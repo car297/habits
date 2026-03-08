@@ -36,7 +36,6 @@ function calcStreak(completions) {
   return streak;
 }
 
-// Last N days ending today, oldest first
 function getLastNDays(n) {
   const days = [];
   const cursor = new Date();
@@ -94,7 +93,7 @@ function useLocalStorage(key, initial) {
 
 function CheckCell({ done, onToggle, isToday, isFuture }) {
   return (
-    <td className={`text-center py-2 px-1 ${isToday ? "bg-indigo-950/60" : ""}`}>
+    <td className={`text-center py-2 px-1 ${isToday ? "bg-indigo-50 dark:bg-indigo-950/60" : ""}`}>
       <button
         onClick={isFuture ? undefined : onToggle}
         disabled={isFuture}
@@ -102,10 +101,10 @@ function CheckCell({ done, onToggle, isToday, isFuture }) {
           w-8 h-8 rounded-full border-2 flex items-center justify-center mx-auto
           transition-all duration-150
           ${isFuture
-            ? "border-gray-800 cursor-not-allowed opacity-30"
+            ? "border-gray-200 dark:border-gray-800 cursor-not-allowed opacity-30"
             : done
               ? "bg-indigo-500 border-indigo-400 scale-110 text-white"
-              : "border-gray-600 hover:border-indigo-400 text-transparent"
+              : "border-gray-300 dark:border-gray-600 hover:border-indigo-400 text-transparent"
           }
         `}
         aria-label={done ? "Mark incomplete" : "Mark complete"}
@@ -124,14 +123,14 @@ function HabitRow({ habit, completions, weekDays, todayISO, onToggle, onDelete, 
   const weekCount = weekDays.filter((d) => habitCompletions.includes(toISO(d))).length;
 
   return (
-    <tr className="border-b border-gray-800 group">
+    <tr className="border-b border-gray-200 dark:border-gray-800 group">
       <td className="py-3 px-3 whitespace-nowrap">
         <button
           onClick={() => onOpen(habit.id)}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity text-left"
         >
           <span className="text-xl">{habit.emoji}</span>
-          <span className="text-gray-200 font-medium text-sm underline-offset-2 hover:underline">
+          <span className="text-gray-800 dark:text-gray-200 font-medium text-sm underline-offset-2 hover:underline">
             {habit.name}
           </span>
           {streak > 0 && (
@@ -156,10 +155,10 @@ function HabitRow({ habit, completions, weekDays, todayISO, onToggle, onDelete, 
       })}
 
       <td className="py-3 px-3 text-right whitespace-nowrap">
-        <span className="text-xs text-gray-400 mr-2">{weekCount}/7</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400 mr-2">{weekCount}/7</span>
         <button
           onClick={() => onDelete(habit.id)}
-          className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all text-xs px-1"
+          className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition-all text-xs px-1"
           aria-label="Delete habit"
         >
           ✕
@@ -172,14 +171,10 @@ function HabitRow({ habit, completions, weekDays, todayISO, onToggle, onDelete, 
 // ── ActivityHeatmap ────────────────────────────────────────────────────────
 
 function ActivityHeatmap({ completions }) {
-  const days = getLastNDays(28); // 4 weeks
+  const days = getLastNDays(28);
   const todayISO = toISO(new Date());
-
-  // Group into weeks of 7
   const weeks = [];
-  for (let i = 0; i < days.length; i += 7) {
-    weeks.push(days.slice(i, i + 7));
-  }
+  for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7));
 
   return (
     <div>
@@ -199,8 +194,8 @@ function ActivityHeatmap({ completions }) {
                     done
                       ? "bg-indigo-500"
                       : isToday
-                        ? "bg-gray-700 ring-1 ring-indigo-500"
-                        : "bg-gray-800"
+                        ? "bg-gray-300 dark:bg-gray-700 ring-1 ring-indigo-500"
+                        : "bg-gray-200 dark:bg-gray-800"
                   }`}
                 />
               );
@@ -208,7 +203,7 @@ function ActivityHeatmap({ completions }) {
           </div>
         ))}
       </div>
-      <div className="flex gap-1 mt-1 text-xs text-gray-600">
+      <div className="flex gap-1 mt-1 text-xs text-gray-400 dark:text-gray-600">
         {["M","T","W","T","F","S","S"].map((d, i) => (
           <div key={i} className="w-6 text-center">{d}</div>
         ))}
@@ -227,16 +222,14 @@ function HabitDetail({ habit, completions, journal, onClose, onAddEntry, onDelet
   const nameInputRef = useRef(null);
   const textareaRef = useRef(null);
   const habitCompletions = completions[habit.id] || [];
-  const entries = (journal[habit.id] || []).slice().reverse(); // newest first
+  const entries = (journal[habit.id] || []).slice().reverse();
   const streak = calcStreak(habitCompletions);
   const totalDone = habitCompletions.length;
 
-  // Focus name input when entering edit mode
   useEffect(() => {
     if (editingName) nameInputRef.current?.select();
   }, [editingName]);
 
-  // Close on Escape (but cancel rename first if active)
   useEffect(() => {
     function onKey(e) {
       if (e.key === "Escape") {
@@ -266,17 +259,11 @@ function HabitDetail({ habit, completions, journal, onClose, onAddEntry, onDelet
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 z-40"
-        onClick={onClose}
-        aria-hidden
-      />
+      <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} aria-hidden />
 
-      {/* Drawer */}
-      <aside className="fixed right-0 top-0 h-full w-full max-w-md bg-[#141414] border-l border-gray-800 z-50 flex flex-col shadow-2xl">
+      <aside className="fixed right-0 top-0 h-full w-full max-w-md bg-white dark:bg-[#141414] border-l border-gray-200 dark:border-gray-800 z-50 flex flex-col shadow-2xl">
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{habit.emoji}</span>
             <div>
@@ -286,19 +273,17 @@ function HabitDetail({ habit, completions, journal, onClose, onAddEntry, onDelet
                   value={nameValue}
                   onChange={(e) => setNameValue(e.target.value)}
                   onBlur={commitRename}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") commitRename();
-                  }}
-                  className="bg-gray-700 border border-indigo-500 rounded px-2 py-0.5 text-base font-semibold text-gray-100 focus:outline-none w-48"
+                  onKeyDown={(e) => { if (e.key === "Enter") commitRename(); }}
+                  className="bg-gray-100 dark:bg-gray-700 border border-indigo-500 rounded px-2 py-0.5 text-base font-semibold text-gray-900 dark:text-gray-100 focus:outline-none w-48"
                 />
               ) : (
                 <button
                   onClick={() => setEditingName(true)}
-                  className="font-semibold text-gray-100 text-base hover:text-indigo-300 transition-colors text-left group/name"
+                  className="font-semibold text-gray-900 dark:text-gray-100 text-base hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors text-left group/name"
                   title="Click to rename"
                 >
                   {habit.name}
-                  <span className="ml-1.5 text-xs text-gray-600 group-hover/name:text-gray-400">✎</span>
+                  <span className="ml-1.5 text-xs text-gray-400 dark:text-gray-600 group-hover/name:text-gray-600 dark:group-hover/name:text-gray-400">✎</span>
                 </button>
               )}
               <p className="text-xs text-gray-500">Since {fmtDate(habit.createdAt)}</p>
@@ -306,7 +291,7 @@ function HabitDetail({ habit, completions, journal, onClose, onAddEntry, onDelet
           </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-200 transition-colors text-lg leading-none p-1"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 transition-colors text-lg leading-none p-1"
             aria-label="Close"
           >
             ✕
@@ -317,19 +302,18 @@ function HabitDetail({ habit, completions, journal, onClose, onAddEntry, onDelet
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
           {/* Stats */}
           <div className="flex gap-4">
-            <div className="flex-1 bg-gray-800/60 rounded-lg px-4 py-3 text-center">
-              <div className="text-2xl font-bold text-indigo-400">
-                {streak >= 3 ? "🔥" : streak}
-                {streak >= 3 ? ` ${streak}` : ""}
+            <div className="flex-1 bg-gray-100 dark:bg-gray-800/60 rounded-lg px-4 py-3 text-center">
+              <div className="text-2xl font-bold text-indigo-500 dark:text-indigo-400">
+                {streak >= 3 ? "🔥" : streak}{streak >= 3 ? ` ${streak}` : ""}
               </div>
               <div className="text-xs text-gray-500 mt-1">day streak</div>
             </div>
-            <div className="flex-1 bg-gray-800/60 rounded-lg px-4 py-3 text-center">
-              <div className="text-2xl font-bold text-gray-200">{totalDone}</div>
+            <div className="flex-1 bg-gray-100 dark:bg-gray-800/60 rounded-lg px-4 py-3 text-center">
+              <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">{totalDone}</div>
               <div className="text-xs text-gray-500 mt-1">total days</div>
             </div>
-            <div className="flex-1 bg-gray-800/60 rounded-lg px-4 py-3 text-center">
-              <div className="text-2xl font-bold text-gray-200">{entries.length}</div>
+            <div className="flex-1 bg-gray-100 dark:bg-gray-800/60 rounded-lg px-4 py-3 text-center">
+              <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">{entries.length}</div>
               <div className="text-xs text-gray-500 mt-1">journal entries</div>
             </div>
           </div>
@@ -339,7 +323,7 @@ function HabitDetail({ habit, completions, journal, onClose, onAddEntry, onDelet
 
           {/* Add journal entry */}
           <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
               Add Journal Entry
             </h3>
             <form onSubmit={handleSubmit} className="space-y-2">
@@ -348,7 +332,7 @@ function HabitDetail({ habit, completions, journal, onClose, onAddEntry, onDelet
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Title (optional)"
-                className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-2 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-indigo-500"
               />
               <textarea
                 ref={textareaRef}
@@ -356,13 +340,13 @@ function HabitDetail({ habit, completions, journal, onClose, onAddEntry, onDelet
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Write a note, reflection, or anything…"
                 rows={4}
-                className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none"
+                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-2 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSubmit(e);
                 }}
               />
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600">⌘↵ to save</span>
+                <span className="text-xs text-gray-400 dark:text-gray-600">⌘↵ to save</span>
                 <button
                   type="submit"
                   disabled={!text.trim()}
@@ -375,43 +359,41 @@ function HabitDetail({ habit, completions, journal, onClose, onAddEntry, onDelet
           </div>
 
           {/* Journal entries list */}
-          {entries.length > 0 && (
+          {entries.length > 0 ? (
             <div>
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
                 Journal ({entries.length})
               </h3>
               <div className="space-y-3">
                 {entries.map((entry) => (
                   <div
                     key={entry.id}
-                    className="bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-3 group/entry"
+                    className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg px-4 py-3 group/entry"
                   >
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <div>
                         {entry.title && (
-                          <p className="text-sm font-medium text-gray-200">{entry.title}</p>
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{entry.title}</p>
                         )}
                         <p className="text-xs text-gray-500">{fmtDateTime(entry.createdAt)}</p>
                       </div>
                       <button
                         onClick={() => onDeleteEntry(habit.id, entry.id)}
-                        className="opacity-0 group-hover/entry:opacity-100 text-gray-600 hover:text-red-400 transition-all text-xs shrink-0"
+                        className="opacity-0 group-hover/entry:opacity-100 text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition-all text-xs shrink-0"
                         aria-label="Delete entry"
                       >
                         ✕
                       </button>
                     </div>
-                    <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
                       {entry.text}
                     </p>
                   </div>
                 ))}
               </div>
             </div>
-          )}
-
-          {entries.length === 0 && (
-            <p className="text-sm text-gray-600 text-center py-4">
+          ) : (
+            <p className="text-sm text-gray-400 dark:text-gray-600 text-center py-4">
               No journal entries yet. Write your first one above.
             </p>
           )}
@@ -444,7 +426,7 @@ function AddHabitRow({ onAdd }) {
         onChange={(e) => setEmoji(e.target.value)}
         maxLength={4}
         placeholder="✅"
-        className="w-12 bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-center text-lg focus:outline-none focus:border-indigo-500"
+        className="w-12 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-2 py-1.5 text-center text-lg focus:outline-none focus:border-indigo-500"
         aria-label="Emoji"
       />
       <input
@@ -452,7 +434,7 @@ function AddHabitRow({ onAdd }) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Add a habit…"
-        className="flex-1 bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+        className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-3 py-1.5 text-sm text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-indigo-500"
         aria-label="Habit name"
       />
       <button
@@ -475,11 +457,11 @@ export default function HabitTracker() {
   const [journal, setJournal] = useLocalStorage("journal", {});
   const [weekOffset, setWeekOffset] = useState(0);
   const [openHabitId, setOpenHabitId] = useState(null);
+  const [dark, setDark] = useLocalStorage("darkMode", true);
 
   const todayISO = toISO(new Date());
   const weekDays = getWeekDays(weekOffset);
   const isCurrentWeek = weekOffset === 0;
-
   const openHabit = habits.find((h) => h.id === openHabitId) ?? null;
 
   const totalCells = habits.length * 7;
@@ -537,115 +519,130 @@ export default function HabitTracker() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-gray-100 font-sans">
-      {/* Header */}
-      <header className="px-4 py-5 border-b border-gray-800 flex items-center justify-between">
-        <h1 className="text-xl font-bold tracking-tight">Habit Tracker</h1>
-        {weekScore !== null && (
-          <span className="text-sm text-indigo-400 font-semibold">
-            {weekScore}%{isCurrentWeek ? " this week" : " that week"}
-          </span>
-        )}
-      </header>
-
-      <main className="max-w-3xl mx-auto px-2 py-6">
-        {/* Week navigation */}
-        <div className="flex items-center justify-between px-3 mb-4">
-          <button
-            onClick={() => setWeekOffset((o) => o - 1)}
-            className="text-gray-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-gray-800"
-          >
-            ← Prev
-          </button>
-
-          <div className="text-center">
-            <div className="text-sm font-medium text-gray-300">{formatWeekLabel(weekDays)}</div>
-            {!isCurrentWeek ? (
-              <button
-                onClick={() => setWeekOffset(0)}
-                className="text-xs text-indigo-400 hover:text-indigo-300 mt-0.5"
-              >
-                Back to today
-              </button>
-            ) : (
-              <div className="text-xs text-gray-600 mt-0.5">Current week</div>
+    <div className={dark ? "dark" : ""}>
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0f0f0f] text-gray-900 dark:text-gray-100 font-sans">
+        {/* Header */}
+        <header className="px-4 py-5 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+          <h1 className="text-xl font-bold tracking-tight">Habit Tracker</h1>
+          <div className="flex items-center gap-3">
+            {weekScore !== null && (
+              <span className="text-sm text-indigo-600 dark:text-indigo-400 font-semibold">
+                {weekScore}%{isCurrentWeek ? " this week" : " that week"}
+              </span>
             )}
+            <button
+              onClick={() => setDark((d) => !d)}
+              className="text-lg leading-none p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Toggle dark mode"
+              title={dark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {dark ? "☀️" : "🌙"}
+            </button>
+          </div>
+        </header>
+
+        <main className="max-w-3xl mx-auto px-2 py-6">
+          {/* Week navigation */}
+          <div className="flex items-center justify-between px-3 mb-4">
+            <button
+              onClick={() => setWeekOffset((o) => o - 1)}
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-800"
+            >
+              ← Prev
+            </button>
+
+            <div className="text-center">
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {formatWeekLabel(weekDays)}
+              </div>
+              {!isCurrentWeek ? (
+                <button
+                  onClick={() => setWeekOffset(0)}
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 mt-0.5"
+                >
+                  Back to today
+                </button>
+              ) : (
+                <div className="text-xs text-gray-400 dark:text-gray-600 mt-0.5">Current week</div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setWeekOffset((o) => o + 1)}
+              disabled={isCurrentWeek}
+              className={`px-2 py-1 rounded transition-colors ${
+                isCurrentWeek
+                  ? "text-gray-300 dark:text-gray-700 cursor-not-allowed"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800"
+              }`}
+            >
+              Next →
+            </button>
           </div>
 
-          <button
-            onClick={() => setWeekOffset((o) => o + 1)}
-            disabled={isCurrentWeek}
-            className={`px-2 py-1 rounded transition-colors ${
-              isCurrentWeek
-                ? "text-gray-700 cursor-not-allowed"
-                : "text-gray-400 hover:text-white hover:bg-gray-800"
-            }`}
-          >
-            Next →
-          </button>
-        </div>
+          {habits.length === 0 ? (
+            <div className="text-center text-gray-400 dark:text-gray-500 mt-20 text-base">
+              No habits yet — add one below 👇
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-800">
+                    <th className="py-2 px-3 text-left text-gray-500 font-medium text-xs">Habit</th>
+                    {weekDays.map((day, i) => {
+                      const iso = toISO(day);
+                      const isToday = iso === todayISO;
+                      return (
+                        <th
+                          key={iso}
+                          className={`py-2 px-1 text-center text-xs font-medium w-10 ${
+                            isToday
+                              ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          <div>{DAY_LABELS[i]}</div>
+                          <div className="text-gray-400 dark:text-gray-600 font-normal">{day.getDate()}</div>
+                        </th>
+                      );
+                    })}
+                    <th className="py-2 px-3 text-right text-gray-500 font-medium text-xs">Week</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {habits.map((habit) => (
+                    <HabitRow
+                      key={habit.id}
+                      habit={habit}
+                      completions={completions}
+                      weekDays={weekDays}
+                      todayISO={todayISO}
+                      onToggle={handleToggle}
+                      onDelete={handleDelete}
+                      onOpen={setOpenHabitId}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-        {habits.length === 0 ? (
-          <div className="text-center text-gray-500 mt-20 text-base">
-            No habits yet — add one below 👇
-          </div>
-        ) : (
-          <div className="overflow-x-auto rounded-lg border border-gray-800">
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-gray-800">
-                  <th className="py-2 px-3 text-left text-gray-500 font-medium text-xs">Habit</th>
-                  {weekDays.map((day, i) => {
-                    const iso = toISO(day);
-                    const isToday = iso === todayISO;
-                    return (
-                      <th
-                        key={iso}
-                        className={`py-2 px-1 text-center text-xs font-medium w-10 ${
-                          isToday ? "text-indigo-400 bg-indigo-950/60" : "text-gray-500"
-                        }`}
-                      >
-                        <div>{DAY_LABELS[i]}</div>
-                        <div className="text-gray-600 font-normal">{day.getDate()}</div>
-                      </th>
-                    );
-                  })}
-                  <th className="py-2 px-3 text-right text-gray-500 font-medium text-xs">Week</th>
-                </tr>
-              </thead>
-              <tbody>
-                {habits.map((habit) => (
-                  <HabitRow
-                    key={habit.id}
-                    habit={habit}
-                    completions={completions}
-                    weekDays={weekDays}
-                    todayISO={todayISO}
-                    onToggle={handleToggle}
-                    onDelete={handleDelete}
-                    onOpen={setOpenHabitId}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AddHabitRow onAdd={handleAdd} />
+        </main>
+
+        {openHabit && (
+          <HabitDetail
+            habit={openHabit}
+            completions={completions}
+            journal={journal}
+            onClose={() => setOpenHabitId(null)}
+            onAddEntry={handleAddEntry}
+            onDeleteEntry={handleDeleteEntry}
+            onRename={handleRename}
+          />
         )}
-
-        <AddHabitRow onAdd={handleAdd} />
-      </main>
-
-      {/* Habit detail drawer */}
-      {openHabit && (
-        <HabitDetail
-          habit={openHabit}
-          completions={completions}
-          journal={journal}
-          onClose={() => setOpenHabitId(null)}
-          onAddEntry={handleAddEntry}
-          onDeleteEntry={handleDeleteEntry}
-          onRename={handleRename}
-        />
-      )}
+      </div>
     </div>
   );
 }
