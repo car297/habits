@@ -127,14 +127,15 @@ function HabitRow({ habit, completions, weekDays, todayISO, onToggle, onDelete, 
       <td className="py-3 px-3 whitespace-nowrap">
         <button
           onClick={() => onOpen(habit.id)}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity text-left"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity text-left max-w-[320px]"
+          title={habit.name}
         >
-          <span className="text-xl">{habit.emoji}</span>
-          <span className="text-gray-800 dark:text-gray-200 font-medium text-sm underline-offset-2 hover:underline">
+          <span className="text-xl shrink-0">{habit.emoji}</span>
+          <span className="text-gray-800 dark:text-gray-200 font-medium text-sm underline-offset-2 hover:underline truncate min-w-0">
             {habit.name}
           </span>
           {streak > 0 && (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-500 shrink-0">
               {streak >= 3 ? "🔥" : "🗓️"} {streak}d
             </span>
           )}
